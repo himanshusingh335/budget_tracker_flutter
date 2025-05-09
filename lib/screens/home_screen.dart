@@ -135,91 +135,94 @@ class _HomeScreenState extends State<HomeScreen> {
                     final totalDiffColor =
                         totalDiffValue < 0 ? Colors.red : Colors.green;
 
-                    return Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 8.0),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              'Summary',
-                              style: Theme.of(context).textTheme.titleLarge,
+                    return RefreshIndicator(
+                      onRefresh: _fetchData,
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8.0),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'Summary',
+                                style: Theme.of(context).textTheme.titleLarge,
+                              ),
                             ),
                           ),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            TotalCard(
-                              title: 'Expenditure',
-                              value:
-                                  '₹ ${totalSummary.expenditure.toStringAsFixed(2)}',
-                            ),
-                            TotalCard(
-                              title: 'Budget',
-                              value:
-                                  '₹ ${totalSummary.budget.toStringAsFixed(2)}',
-                            ),
-                            TotalCard(
-                              title: 'Difference',
-                              value:
-                                  '₹ ${totalSummary.difference.toStringAsFixed(2)}',
-                              color: totalDiffColor,
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Expanded(
-                          flex: 1,
-                          child: ListView.builder(
-                            itemCount: snapshot.data!.length,
-                            itemBuilder: (context, index) {
-                              final summary = snapshot.data![index];
-                              if (summary.category.isEmpty) {
-                                return const SizedBox.shrink();
-                              }
-                              return SummaryTile(summary: summary);
-                            },
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              TotalCard(
+                                title: 'Expenditure',
+                                value:
+                                    '₹ ${totalSummary.expenditure.toStringAsFixed(2)}',
+                              ),
+                              TotalCard(
+                                title: 'Budget',
+                                value:
+                                    '₹ ${totalSummary.budget.toStringAsFixed(2)}',
+                              ),
+                              TotalCard(
+                                title: 'Difference',
+                                value:
+                                    '₹ ${totalSummary.difference.toStringAsFixed(2)}',
+                                color: totalDiffColor,
+                              ),
+                            ],
                           ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(
-                            top: 16.0,
-                            bottom: 8.0,
-                          ),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              'Transactions',
-                              style: Theme.of(context).textTheme.titleLarge,
+                          const SizedBox(height: 12),
+                          Expanded(
+                            flex: 1,
+                            child: ListView.builder(
+                              itemCount: snapshot.data!.length,
+                              itemBuilder: (context, index) {
+                                final summary = snapshot.data![index];
+                                if (summary.category.isEmpty) {
+                                  return const SizedBox.shrink();
+                                }
+                                return SummaryTile(summary: summary);
+                              },
                             ),
                           ),
-                        ),
-                        Expanded(
-                          flex: 2,
-                          child:
-                              transactions.isEmpty
-                                  ? const Center(
-                                    child: Text('No transactions found.'),
-                                  )
-                                  : ListView.builder(
-                                    itemCount: transactions.length,
-                                    itemBuilder: (context, index) {
-                                      final txn = transactions[index];
-                                      return TransactionTile(
-                                        txn: txn,
-                                        onDeleted: () {
-                                          setState(() {
-                                            transactions.removeWhere(
-                                              (t) => t.id == txn.id,
-                                            );
-                                          });
-                                        },
-                                      );
-                                    },
-                                  ),
-                        ),
-                      ],
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              top: 16.0,
+                              bottom: 8.0,
+                            ),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'Transactions',
+                                style: Theme.of(context).textTheme.titleLarge,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 2,
+                            child:
+                                transactions.isEmpty
+                                    ? const Center(
+                                      child: Text('No transactions found.'),
+                                    )
+                                    : ListView.builder(
+                                      itemCount: transactions.length,
+                                      itemBuilder: (context, index) {
+                                        final txn = transactions[index];
+                                        return TransactionTile(
+                                          txn: txn,
+                                          onDeleted: () {
+                                            setState(() {
+                                              transactions.removeWhere(
+                                                (t) => t.id == txn.id,
+                                              );
+                                            });
+                                          },
+                                        );
+                                      },
+                                    ),
+                          ),
+                        ],
+                      ),
                     );
                   }
                 },

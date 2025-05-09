@@ -68,19 +68,19 @@ class ApiService {
 
   // ==================== BUDGET ====================
   static Future<List<Budget>> fetchBudgets(String month, String year) async {
-    final url = Uri.parse('$baseUrl/budgets/$month/$year');
+    final url = Uri.parse('$baseUrl/budget/$month/$year');
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
-      List<dynamic> data = json.decode(response.body);
-      return data.map((jsonItem) => Budget.fromJson(jsonItem)).toList();
+      final Map<String, dynamic> jsonData = json.decode(response.body);
+      return Budget.fromJsonList(jsonData);
     } else {
       throw Exception('Failed to load budgets');
     }
   }
 
   static Future<void> addBudget(Budget budget) async {
-    final url = Uri.parse('$baseUrl/budgets');
+    final url = Uri.parse('$baseUrl/budget');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
@@ -92,9 +92,13 @@ class ApiService {
     }
   }
 
-  static Future<void> deleteBudget(String id) async {
-    final url = Uri.parse('$baseUrl/budgets/$id');
-    final response = await http.delete(url);
+  static Future<void> deleteBudget(String monthYear, String category) async {
+    final url = Uri.parse('$baseUrl/budget');
+    final response = await http.delete(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({'MonthYear': monthYear, 'Category': category}),
+    );
 
     if (response.statusCode != 204) {
       throw Exception('Failed to delete budget');

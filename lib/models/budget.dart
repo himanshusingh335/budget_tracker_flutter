@@ -10,17 +10,19 @@ class Budget {
   });
 
   /// Factory constructor to create a Budget from JSON
-  factory Budget.fromJson(Map<String, dynamic> json) {
+  factory Budget.fromJson(Map<String, dynamic> json, String monthYear) {
     return Budget(
-      monthYear: json['MonthYear'],
+      monthYear: monthYear,
       category: json['Category'],
       budget: (json['Budget'] as num).toDouble(),
     );
   }
 
   /// Optional helper if you're dealing with a list of budgets
-  static List<Budget> fromJsonList(List<dynamic> jsonList) {
-    return jsonList.map((json) => Budget.fromJson(json)).toList();
+  static List<Budget> fromJsonList(Map<String, dynamic> json) {
+    final String monthYear = json['MonthYear'];
+    final List<dynamic> budgets = json['Budgets'];
+    return budgets.map((b) => Budget.fromJson(b, monthYear)).toList();
   }
   Map<String, dynamic> toJson() {
     return {
