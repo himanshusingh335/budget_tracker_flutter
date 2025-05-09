@@ -19,6 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late String selectedYear;
   late Future<List<Summary>> summaryFuture;
   late Future<List<Transaction>> transactionFuture;
+  List<Transaction> transactions = [];
 
   final List<String> months = List.generate(
     12,
@@ -38,13 +39,20 @@ class _HomeScreenState extends State<HomeScreen> {
     _fetchData();
   }
 
-  void _fetchData() {
+  Future<void> _fetchData() async {
     setState(() {
       summaryFuture = ApiService.fetchSummary(selectedMonth, selectedYear);
       transactionFuture = ApiService.fetchTransactions(
         selectedMonth,
         selectedYear,
       );
+    });
+
+    final fetchedTransactions =
+        await ApiService.fetchTransactions(selectedMonth, selectedYear);
+
+    setState(() {
+      transactions = fetchedTransactions;
     });
   }
 
@@ -185,34 +193,22 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         Expanded(
                           flex: 2,
-                          child: FutureBuilder<List<Transaction>>(
-                            future: transactionFuture,
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return const Center(
-                                  child: CircularProgressIndicator(),
-                                );
-                              } else if (snapshot.hasError) {
-                                return Center(
-                                  child: Text('Error: ${snapshot.error}'),
-                                );
-                              } else if (!snapshot.hasData ||
-                                  snapshot.data!.isEmpty) {
-                                return const Center(
-                                  child: Text('No transactions found.'),
-                                );
-                              } else {
-                                return ListView.builder(
-                                  itemCount: snapshot.data!.length,
+                          child: transactions.isEmpty
+                              ? const Center(child: Text('No transactions found.'))
+                              : ListView.builder(
+                                  itemCount: transactions.length,
                                   itemBuilder: (context, index) {
-                                    final txn = snapshot.data![index];
-                                    return TransactionTile(txn: txn, onDeleted: _fetchData);
+                                    final txn = transactions[index];
+                                    return TransactionTile(
+                                      txn: txn,
+                                      onDeleted: () {
+                                        setState(() {
+                                          transactions.removeWhere((t) => t.id == txn.id);
+                                        });
+                                      },
+                                    );
                                   },
-                                );
-                              }
-                            },
-                          ),
+                                ),
                         ),
                       ],
                     );
