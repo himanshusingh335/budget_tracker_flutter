@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/summary.dart';
 import '../models/transaction.dart';
+import '../widgets/total_card.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -49,23 +50,6 @@ class _HomeScreenState extends State<HomeScreen> {
       selectedYear = year;
       _fetchData();
     });
-  }
-
-  Widget _buildTotalCard(String title, String value, {Color? color}) {
-    return Expanded(
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Column(
-            children: [
-              Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              Text(value, style: TextStyle(fontSize: 16, color: color)),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 
   @override
@@ -150,17 +134,20 @@ class _HomeScreenState extends State<HomeScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            _buildTotalCard(
-                              'Expenditure',
-                              '₹ ${totalSummary.expenditure.toStringAsFixed(2)}',
+                            TotalCard(
+                              title: 'Expenditure',
+                              value:
+                                  '₹ ${totalSummary.expenditure.toStringAsFixed(2)}',
                             ),
-                            _buildTotalCard(
-                              'Budget',
-                              '₹ ${totalSummary.budget.toStringAsFixed(2)}',
+                            TotalCard(
+                              title: 'Budget',
+                              value:
+                                  '₹ ${totalSummary.budget.toStringAsFixed(2)}',
                             ),
-                            _buildTotalCard(
-                              'Difference',
-                              '₹ ${totalSummary.difference.toStringAsFixed(2)}',
+                            TotalCard(
+                              title: 'Difference',
+                              value:
+                                  '₹ ${totalSummary.difference.toStringAsFixed(2)}',
                               color: totalDiffColor,
                             ),
                           ],
