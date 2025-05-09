@@ -1,3 +1,5 @@
+import 'package:budget_tracker_flutter/screens/budget_set_screen.dart';
+import 'package:budget_tracker_flutter/screens/new_transaction_screen.dart';
 import 'package:budget_tracker_flutter/services/services.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -48,8 +50,10 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     });
 
-    final fetchedTransactions =
-        await ApiService.fetchTransactions(selectedMonth, selectedYear);
+    final fetchedTransactions = await ApiService.fetchTransactions(
+      selectedMonth,
+      selectedYear,
+    );
 
     setState(() {
       transactions = fetchedTransactions;
@@ -193,22 +197,27 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         Expanded(
                           flex: 2,
-                          child: transactions.isEmpty
-                              ? const Center(child: Text('No transactions found.'))
-                              : ListView.builder(
-                                  itemCount: transactions.length,
-                                  itemBuilder: (context, index) {
-                                    final txn = transactions[index];
-                                    return TransactionTile(
-                                      txn: txn,
-                                      onDeleted: () {
-                                        setState(() {
-                                          transactions.removeWhere((t) => t.id == txn.id);
-                                        });
-                                      },
-                                    );
-                                  },
-                                ),
+                          child:
+                              transactions.isEmpty
+                                  ? const Center(
+                                    child: Text('No transactions found.'),
+                                  )
+                                  : ListView.builder(
+                                    itemCount: transactions.length,
+                                    itemBuilder: (context, index) {
+                                      final txn = transactions[index];
+                                      return TransactionTile(
+                                        txn: txn,
+                                        onDeleted: () {
+                                          setState(() {
+                                            transactions.removeWhere(
+                                              (t) => t.id == txn.id,
+                                            );
+                                          });
+                                        },
+                                      );
+                                    },
+                                  ),
                         ),
                       ],
                     );
@@ -218,6 +227,50 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showModalBottomSheet(
+            context: context,
+            builder: (context) {
+              return SafeArea(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ListTile(
+                      leading: const Icon(Icons.add),
+                      title: const Text('Add Transaction'),
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (context) => const NewTransactionScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.account_balance_wallet),
+                      title: const Text('Set Budget'),
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SetBudgetScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }

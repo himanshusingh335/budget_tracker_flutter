@@ -35,10 +35,21 @@ class ApiService {
 
   static Future<void> addTransaction(Transaction txn) async {
     final url = Uri.parse('$baseUrl/transactions');
+
+    final Map<String, dynamic> requestBody = {
+      'Date': txn.date,
+      'Description': txn.description,
+      'Category': txn.category,
+      'Expenditure': txn.expenditure,
+      'Year': txn.year,
+      'Month': txn.month,
+      'Day': txn.day,
+    };
+
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
-      body: json.encode(txn.toJson()),
+      body: json.encode(requestBody),
     );
 
     if (response.statusCode != 201) {
