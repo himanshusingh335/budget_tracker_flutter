@@ -39,11 +39,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _fetchData() {
-    summaryFuture = ApiService.fetchSummary(selectedMonth, selectedYear);
-    transactionFuture = ApiService.fetchTransactions(
-      selectedMonth,
-      selectedYear,
-    );
+    setState(() {
+      summaryFuture = ApiService.fetchSummary(selectedMonth, selectedYear);
+      transactionFuture = ApiService.fetchTransactions(
+        selectedMonth,
+        selectedYear,
+      );
+    });
   }
 
   void _onDateChanged(String month, String year) {
@@ -205,7 +207,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   itemCount: snapshot.data!.length,
                                   itemBuilder: (context, index) {
                                     final txn = snapshot.data![index];
-                                    return TransactionTile(txn: txn);
+                                    return TransactionTile(txn: txn, onDeleted: _fetchData);
                                   },
                                 );
                               }

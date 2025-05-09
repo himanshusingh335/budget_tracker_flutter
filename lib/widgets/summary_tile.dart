@@ -4,7 +4,7 @@ import '../models/summary.dart';
 class SummaryTile extends StatelessWidget {
   final Summary summary;
 
-  const SummaryTile({Key? key, required this.summary}) : super(key: key);
+  const SummaryTile({super.key, required this.summary});
 
   @override
   Widget build(BuildContext context) {
