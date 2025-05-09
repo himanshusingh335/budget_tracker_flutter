@@ -1,0 +1,92 @@
+import 'dart:convert';
+import 'package:budget_tracker_flutter/models/budget.dart';
+import 'package:budget_tracker_flutter/models/summary.dart';
+import 'package:budget_tracker_flutter/models/transaction.dart';
+import 'package:http/http.dart' as http;
+
+class ApiService {
+  static const String baseUrl = 'https://c0dd-2402-e280-3e0f-1e-2c39-57f4-ae46-6c8a.ngrok-free.app';
+
+  // ==================== SUMMARY ====================
+  static Future<List<Summary>> fetchSummary(String month, String year) async {
+    final url = Uri.parse('$baseUrl/summary/$month/$year');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = json.decode(response.body);
+      return data.map((jsonItem) => Summary.fromJson(jsonItem)).toList();
+    } else {
+      throw Exception('Failed to load summary');
+    }
+  }
+
+  // ==================== TRANSACTIONS ====================
+  static Future<List<Transaction>> fetchTransactions(String month, String year) async {
+    final url = Uri.parse('$baseUrl/transactions/$month/$year');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = json.decode(response.body);
+      return data.map((jsonItem) => Transaction.fromJson(jsonItem)).toList();
+    } else {
+      throw Exception('Failed to load transactions');
+    }
+  }
+
+  static Future<void> addTransaction(Transaction txn) async {
+    final url = Uri.parse('$baseUrl/transactions');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode(txn.toJson()),
+    );
+
+    if (response.statusCode != 201) {
+      throw Exception('Failed to add transaction');
+    }
+  }
+
+  static Future<void> deleteTransaction(String id) async {
+    final url = Uri.parse('$baseUrl/transactions/$id');
+    final response = await http.delete(url);
+
+    if (response.statusCode != 204) {
+      throw Exception('Failed to delete transaction');
+    }
+  }
+
+  // ==================== BUDGET ====================
+  static Future<List<Budget>> fetchBudgets(String month, String year) async {
+    final url = Uri.parse('$baseUrl/budgets/$month/$year');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = json.decode(response.body);
+      return data.map((jsonItem) => Budget.fromJson(jsonItem)).toList();
+    } else {
+      throw Exception('Failed to load budgets');
+    }
+  }
+
+  static Future<void> addBudget(Budget budget) async {
+    final url = Uri.parse('$baseUrl/budgets');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode(budget.toJson()),
+    );
+
+    if (response.statusCode != 201) {
+      throw Exception('Failed to add budget');
+    }
+  }
+
+  static Future<void> deleteBudget(String id) async {
+    final url = Uri.parse('$baseUrl/budgets/$id');
+    final response = await http.delete(url);
+
+    if (response.statusCode != 204) {
+      throw Exception('Failed to delete budget');
+    }
+  }
+}
