@@ -168,7 +168,12 @@ class _SetBudgetScreenState extends State<SetBudgetScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: const Icon(Icons.delete, color: Colors.white),
                       ),
-                      onDismissed: (direction) => _deleteBudget(budget),
+                      onDismissed: (direction) {
+                        setState(() {
+                          budgets.removeAt(index);
+                        });
+                        _deleteBudget(budget);
+                      },
                       child: Card(
                         child: ListTile(
                           title: Text(budget.category),
