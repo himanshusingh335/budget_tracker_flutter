@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 import '../models/summary.dart';
 import '../models/transaction.dart';
 import '../widgets/total_card.dart';
+import '../widgets/summary_tile.dart';
+import '../widgets/transaction_tile.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -162,35 +164,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               if (summary.category.isEmpty) {
                                 return const SizedBox.shrink();
                               }
-                              return Card(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(12.0),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        summary.category,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text(
-                                            'Expenditure: ₹ ${summary.expenditure}',
-                                          ),
-                                          Text('Budget: ₹ ${summary.budget}'),
-                                          Text('Diff: ₹ ${summary.difference}'),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
+                              return SummaryTile(summary: summary);
                             },
                           ),
                         ),
@@ -231,29 +205,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   itemCount: snapshot.data!.length,
                                   itemBuilder: (context, index) {
                                     final txn = snapshot.data![index];
-                                    return Card(
-                                      child: ListTile(
-                                        contentPadding:
-                                            const EdgeInsets.symmetric(
-                                              horizontal: 16.0,
-                                              vertical: 8.0,
-                                            ),
-                                        title: Text(
-                                          txn.category,
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        subtitle: Text(txn.description),
-                                        trailing: Text(
-                                          '₹ ${txn.expenditure.toStringAsFixed(2)}',
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                            color: Colors.red,
-                                          ),
-                                        ),
-                                      ),
-                                    );
+                                    return TransactionTile(txn: txn);
                                   },
                                 );
                               }
