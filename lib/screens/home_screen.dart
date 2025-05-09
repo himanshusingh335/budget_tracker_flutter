@@ -22,6 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late Future<List<Summary>> summaryFuture;
   late Future<List<Transaction>> transactionFuture;
   List<Transaction> transactions = [];
+  String? fetchError;
 
   final List<String> months = List.generate(
     12,
@@ -43,6 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _fetchData() async {
     setState(() {
+      fetchError = null;
       summaryFuture = ApiService.fetchSummary(selectedMonth, selectedYear);
       transactionFuture = ApiService.fetchTransactions(
         selectedMonth,
@@ -50,14 +52,21 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     });
 
-    final fetchedTransactions = await ApiService.fetchTransactions(
-      selectedMonth,
-      selectedYear,
-    );
-
-    setState(() {
-      transactions = fetchedTransactions;
-    });
+    try {
+      final fetchedTransactions = await ApiService.fetchTransactions(
+        selectedMonth,
+        selectedYear,
+      );
+      if (!mounted) return;
+      setState(() {
+        transactions = fetchedTransactions;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        fetchError = 'Failed to load data. Swipe down to retry.';
+      });
+    }
   }
 
   void _onDateChanged(String month, String year) {
@@ -113,7 +122,18 @@ class _HomeScreenState extends State<HomeScreen> {
               child: FutureBuilder<List<Summary>>(
                 future: summaryFuture,
                 builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
+                  if (fetchError != null) {
+                    return RefreshIndicator(
+                      onRefresh: _fetchData,
+                      child: ListView(
+                        children: [
+                          SizedBox(height: 200),
+                          Center(child: Text(fetchError!)),
+                        ],
+                      ),
+                    );
+                  } else if (snapshot.connectionState ==
+                      ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   } else if (snapshot.hasError) {
                     return Center(child: Text('Error: ${snapshot.error}'));
@@ -248,8 +268,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder:
-                                (context) => const NewTransactionScreen(),
+                            builder: (context) => const NewTransactionScreen(),
                           ),
                         );
                       },
