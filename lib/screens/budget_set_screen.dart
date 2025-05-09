@@ -84,8 +84,19 @@ class _SetBudgetScreenState extends State<SetBudgetScreen> {
   }
 
   Future<void> _deleteBudget(Budget budget) async {
-    await ApiService.deleteBudget(budget.monthYear, budget.category);
-    _fetchBudgets();
+    try {
+      await ApiService.deleteBudget(budget.monthYear, budget.category);
+      await _fetchBudgets();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Budget deleted successfully')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to delete budget')),
+      );
+    }
   }
 
   @override
@@ -101,8 +112,10 @@ class _SetBudgetScreenState extends State<SetBudgetScreen> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
+          child: RefreshIndicator(
+            onRefresh: _fetchBudgets,
+            child: Column(
+              children: [
               Row(
                 children: [
                   DropdownButton<String>(
@@ -197,6 +210,7 @@ class _SetBudgetScreenState extends State<SetBudgetScreen> {
                 child: const Text('Set Budget'),
               ),
             ],
+            ),
           ),
         ),
       ),

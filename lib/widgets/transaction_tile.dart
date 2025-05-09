@@ -20,8 +20,21 @@ class TransactionTile extends StatelessWidget {
         child: const Icon(Icons.delete, color: Colors.white),
       ),
       onDismissed: (direction) async {
-        await ApiService.deleteTransaction(txn.id.toString());
-        if (onDeleted != null) onDeleted!();
+        try {
+          await ApiService.deleteTransaction(txn.id.toString());
+          if (onDeleted != null) onDeleted!();
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Transaction deleted successfully')),
+            );
+          }
+        } catch (e) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Failed to delete transaction')),
+            );
+          }
+        }
       },
       child: Card(
         child: ListTile(
