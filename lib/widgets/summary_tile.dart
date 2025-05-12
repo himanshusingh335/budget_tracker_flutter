@@ -21,16 +21,24 @@ class SummaryTile extends StatelessWidget {
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Expenditure: ₹ ${summary.expenditure}'),
-                Text('Budget: ₹ ${summary.budget}'),
-                Text(
-                  'Diff: ₹ ${summary.difference}',
-                  style: TextStyle(color: diffColor),
-                ),
-              ],
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 12.0),
+                    child: Text('Expenditure: ₹ ${summary.expenditure}'),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 12.0),
+                    child: Text('Budget: ₹ ${summary.budget}'),
+                  ),
+                  Text(
+                    'Diff: ₹ ${summary.difference}',
+                    style: TextStyle(color: diffColor),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
