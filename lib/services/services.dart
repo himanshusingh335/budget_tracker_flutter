@@ -5,7 +5,7 @@ import 'package:budget_tracker_flutter/models/transaction.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  static const String baseUrl = 'https://068b-2402-e280-3e0f-1e-c8c7-6c3e-8b62-ce46.ngrok-free.app';
+  static const String baseUrl = 'http://100.127.54.94:8502/';
 
   // ==================== SUMMARY ====================
   static Future<List<Summary>> fetchSummary(String month, String year) async {
