@@ -79,43 +79,83 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final Color upstoxPrimary = const Color(0xFF6C47FF);
+    final Color upstoxBg = const Color(0xFFF7F8FA);
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Budget Tracker')),
+      backgroundColor: upstoxBg,
+      appBar: AppBar(
+        title: const Text(
+          'Budget Tracker',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white, // Ensure white text on purple
+          ),
+        ),
+        backgroundColor: upstoxPrimary,
+        elevation: 0,
+        centerTitle: true,
+        iconTheme: const IconThemeData(color: Colors.white), // Ensure icons are white
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            Row(
-              children: [
-                DropdownButton<String>(
-                  value: selectedMonth,
-                  onChanged: (value) {
-                    if (value != null) _onDateChanged(value, selectedYear);
-                  },
-                  items:
-                      months.map((month) {
-                        return DropdownMenuItem(
-                          value: month,
-                          child: Text(
-                            DateFormat.MMMM().format(
-                              DateTime(0, int.parse(month)),
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                ),
-                const SizedBox(width: 16),
-                DropdownButton<String>(
-                  value: selectedYear,
-                  onChanged: (value) {
-                    if (value != null) _onDateChanged(selectedMonth, value);
-                  },
-                  items:
-                      years.map((year) {
-                        return DropdownMenuItem(value: year, child: Text(year));
-                      }).toList(),
-                ),
-              ],
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.04),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              child: Row(
+                children: [
+                  DropdownButton<String>(
+                    value: selectedMonth,
+                    underline: Container(),
+                    borderRadius: BorderRadius.circular(12),
+                    dropdownColor: Colors.white,
+                    style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.black),
+                    icon: Icon(Icons.keyboard_arrow_down, color: upstoxPrimary),
+                    onChanged: (value) {
+                      if (value != null) _onDateChanged(value, selectedYear);
+                    },
+                    items: months.map((month) {
+                      return DropdownMenuItem(
+                        value: month,
+                        child: Text(
+                          DateFormat.MMMM().format(DateTime(0, int.parse(month))),
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(width: 16),
+                  DropdownButton<String>(
+                    value: selectedYear,
+                    underline: Container(),
+                    borderRadius: BorderRadius.circular(12),
+                    dropdownColor: Colors.white,
+                    style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.black),
+                    icon: Icon(Icons.keyboard_arrow_down, color: upstoxPrimary),
+                    onChanged: (value) {
+                      if (value != null) _onDateChanged(selectedMonth, value);
+                    },
+                    items: years.map((year) {
+                      return DropdownMenuItem(
+                        value: year,
+                        child: Text(year, style: const TextStyle(fontWeight: FontWeight.w600)),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 16),
             Expanded(
@@ -155,6 +195,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         totalSummary.difference < 0 ? Colors.red : Colors.green;
 
                     return RefreshIndicator(
+                      color: upstoxPrimary,
                       onRefresh: _fetchData,
                       child: Column(
                         children: [
@@ -164,19 +205,21 @@ class _HomeScreenState extends State<HomeScreen> {
                             children: [
                               TotalCard(
                                 title: 'Bud',
-                                value:
-                                    '₹ ${totalSummary.budget.toStringAsFixed(2)}',
+                                value: '₹ ${totalSummary.budget.toStringAsFixed(2)}',
+                                color: Colors.grey[900],
+                                accent: upstoxPrimary,
                               ),
                               TotalCard(
                                 title: 'Exp',
-                                value:
-                                    '₹ ${totalSummary.expenditure.toStringAsFixed(2)}',
+                                value: '₹ ${totalSummary.expenditure.toStringAsFixed(2)}',
+                                color: Colors.red[600],
+                                accent: upstoxPrimary,
                               ),
                               TotalCard(
                                 title: 'Dif',
-                                value:
-                                    '₹ ${totalSummary.difference.toStringAsFixed(2)}',
+                                value: '₹ ${totalSummary.difference.toStringAsFixed(2)}',
                                 color: totalDiffColor,
+                                accent: upstoxPrimary,
                               ),
                             ],
                           ),
@@ -187,35 +230,31 @@ class _HomeScreenState extends State<HomeScreen> {
                               alignment: Alignment.centerLeft,
                               child: Text(
                                 'Summary',
-                                style: Theme.of(context).textTheme.titleLarge,
+                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: upstoxPrimary,
+                                ),
                               ),
                             ),
                           ),
                           SizedBox(
-                            height: 220, // Increased vertical size
+                            height: 220,
                             child: SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children:
-                                    snapshot.data!
-                                        .where(
-                                          (summary) =>
-                                              summary.category.isNotEmpty,
-                                        )
-                                        .map((summary) {
-                                          return Container(
-                                            width:
-                                                200, // Increased horizontal size
-                                            margin: const EdgeInsets.only(
-                                              right: 16,
-                                            ),
-                                            child: SummaryCard(
-                                              summary: summary,
-                                            ),
-                                          );
-                                        })
-                                        .toList(),
+                                children: snapshot.data!
+                                    .where((summary) => summary.category.isNotEmpty)
+                                    .map((summary) {
+                                  return Container(
+                                    width: 200,
+                                    margin: const EdgeInsets.only(right: 16),
+                                    child: SummaryCard(
+                                      summary: summary,
+                                      accent: upstoxPrimary,
+                                    ),
+                                  );
+                                }).toList(),
                               ),
                             ),
                           ),
@@ -228,33 +267,35 @@ class _HomeScreenState extends State<HomeScreen> {
                               alignment: Alignment.centerLeft,
                               child: Text(
                                 'Transactions',
-                                style: Theme.of(context).textTheme.titleLarge,
+                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: upstoxPrimary,
+                                ),
                               ),
                             ),
                           ),
                           Expanded(
                             flex: 2,
-                            child:
-                                transactions.isEmpty
-                                    ? const Center(
-                                      child: Text('No transactions found.'),
-                                    )
-                                    : ListView.builder(
-                                      itemCount: transactions.length,
-                                      itemBuilder: (context, index) {
-                                        final txn = transactions[index];
-                                        return TransactionTile(
-                                          txn: txn,
-                                          onDeleted: () {
-                                            setState(() {
-                                              transactions.removeWhere(
-                                                (t) => t.id == txn.id,
-                                              );
-                                            });
-                                          },
-                                        );
-                                      },
-                                    ),
+                            child: transactions.isEmpty
+                                ? const Center(
+                                    child: Text('No transactions found.'),
+                                  )
+                                : ListView.builder(
+                                    itemCount: transactions.length,
+                                    itemBuilder: (context, index) {
+                                      final txn = transactions[index];
+                                      return TransactionTile(
+                                        txn: txn,
+                                        onDeleted: () {
+                                          setState(() {
+                                            transactions.removeWhere(
+                                              (t) => t.id == txn.id,
+                                            );
+                                          });
+                                        },
+                                      );
+                                    },
+                                  ),
                           ),
                         ],
                       ),
@@ -267,6 +308,8 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: upstoxPrimary,
+        foregroundColor: Colors.white, // White icon
         onPressed: () {
           showModalBottomSheet(
             context: context,
@@ -276,8 +319,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     ListTile(
-                      leading: const Icon(Icons.add),
-                      title: const Text('Add Transaction'),
+                      leading: const Icon(Icons.add, color: Colors.white),
+                      tileColor: upstoxPrimary,
+                      title: const Text(
+                        'Add Transaction',
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
                       onTap: () {
                         Navigator.pop(context);
                         Navigator.push(
@@ -288,9 +335,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         );
                       },
                     ),
+                    const SizedBox(height: 2),
                     ListTile(
-                      leading: const Icon(Icons.account_balance_wallet),
-                      title: const Text('Set Budget'),
+                      leading: const Icon(Icons.account_balance_wallet, color: Colors.white),
+                      tileColor: upstoxPrimary,
+                      title: const Text(
+                        'Set Budget',
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
                       onTap: () {
                         Navigator.pop(context);
                         Navigator.push(

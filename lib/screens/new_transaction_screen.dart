@@ -95,8 +95,21 @@ class _NewTransactionScreenState extends State<NewTransactionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final Color upstoxPrimary = const Color(0xFF6C47FF);
+    final Color upstoxBg = const Color(0xFFF7F8FA);
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Create Transaction')),
+      backgroundColor: upstoxBg,
+      appBar: AppBar(
+        title: const Text(
+          'Create Transaction',
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        ),
+        backgroundColor: upstoxPrimary,
+        elevation: 0,
+        centerTitle: true,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -105,14 +118,24 @@ class _NewTransactionScreenState extends State<NewTransactionScreen> {
             children: [
               TextFormField(
                 controller: _descController,
-                decoration: const InputDecoration(labelText: 'Description'),
+                decoration: InputDecoration(
+                  labelText: 'Description',
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                ),
                 validator: (value) => value == null || value.trim().isEmpty ? 'Enter description' : null,
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _expController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Expenditure'),
+                decoration: InputDecoration(
+                  labelText: 'Expenditure',
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) return 'Enter amount';
                   final num? amount = num.tryParse(value);
@@ -123,6 +146,12 @@ class _NewTransactionScreenState extends State<NewTransactionScreen> {
               DropdownButtonFormField<String>(
                 value: _selectedCategory,
                 hint: const Text('Select Category'),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                ),
                 items: _categories
                     .map((cat) => DropdownMenuItem(value: cat, child: Text(cat)))
                     .toList(),
@@ -131,16 +160,30 @@ class _NewTransactionScreenState extends State<NewTransactionScreen> {
               ),
               const SizedBox(height: 12),
               ListTile(
+                tileColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 title: Text(_selectedDate == null
                     ? 'Pick a Date'
                     : DateFormat('dd MMM yyyy').format(_selectedDate!)),
-                trailing: const Icon(Icons.calendar_today),
+                trailing: Icon(Icons.calendar_today, color: upstoxPrimary),
                 onTap: _pickDate,
               ),
               const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _submitForm,
-                child: const Text('Add Transaction'),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: upstoxPrimary,
+                    foregroundColor: Colors.white, // White text
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  onPressed: _submitForm,
+                  child: const Text(
+                    'Add Transaction',
+                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                ),
               ),
             ],
           ),

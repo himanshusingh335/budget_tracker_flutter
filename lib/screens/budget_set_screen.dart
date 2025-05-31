@@ -116,50 +116,90 @@ class _SetBudgetScreenState extends State<SetBudgetScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final Color upstoxPrimary = const Color(0xFF6C47FF);
+    final Color upstoxBg = const Color(0xFFF7F8FA);
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Set Budget')),
+      backgroundColor: upstoxBg,
+      appBar: AppBar(
+        title: const Text(
+          'Set Budget',
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        ),
+        backgroundColor: upstoxPrimary,
+        elevation: 0,
+        centerTitle: true,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: RefreshIndicator(
+            color: upstoxPrimary,
             onRefresh: _fetchBudgets,
             child: Column(
               children: [
-                Row(
-                  children: [
-                    DropdownButton<String>(
-                      value: selectedMonth,
-                      onChanged: (value) {
-                        if (value != null) _onDateChanged(value, selectedYear);
-                      },
-                      items: months.map((month) {
-                        return DropdownMenuItem(
-                          value: month,
-                          child: Text(DateFormat.MMMM().format(DateTime(0, int.parse(month)))),
-                        );
-                      }).toList(),
-                    ),
-                    const SizedBox(width: 16),
-                    DropdownButton<String>(
-                      value: selectedYear,
-                      onChanged: (value) {
-                        if (value != null) _onDateChanged(selectedMonth, value);
-                      },
-                      items: years.map((year) {
-                        return DropdownMenuItem(
-                          value: year,
-                          child: Text(year),
-                        );
-                      }).toList(),
-                    ),
-                  ],
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.04),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  child: Row(
+                    children: [
+                      DropdownButton<String>(
+                        value: selectedMonth,
+                        underline: Container(),
+                        borderRadius: BorderRadius.circular(12),
+                        dropdownColor: Colors.white,
+                        style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.black),
+                        icon: Icon(Icons.keyboard_arrow_down, color: upstoxPrimary),
+                        onChanged: (value) {
+                          if (value != null) _onDateChanged(value, selectedYear);
+                        },
+                        items: months.map((month) {
+                          return DropdownMenuItem(
+                            value: month,
+                            child: Text(DateFormat.MMMM().format(DateTime(0, int.parse(month))),
+                              style: const TextStyle(fontWeight: FontWeight.w600),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                      const SizedBox(width: 16),
+                      DropdownButton<String>(
+                        value: selectedYear,
+                        underline: Container(),
+                        borderRadius: BorderRadius.circular(12),
+                        dropdownColor: Colors.white,
+                        style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.black),
+                        icon: Icon(Icons.keyboard_arrow_down, color: upstoxPrimary),
+                        onChanged: (value) {
+                          if (value != null) _onDateChanged(selectedMonth, value);
+                        },
+                        items: years.map((year) {
+                          return DropdownMenuItem(
+                            value: year,
+                            child: Text(year, style: const TextStyle(fontWeight: FontWeight.w600)),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 12),
-                const Align(
+                Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
                     'Budget',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: upstoxPrimary),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -192,9 +232,20 @@ class _SetBudgetScreenState extends State<SetBudgetScreen> {
                                 _deleteBudget(budget);
                               },
                               child: Card(
+                                elevation: 4,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                                 child: ListTile(
-                                  title: Text(budget.category),
-                                  trailing: Text('₹ ${budget.budget.toStringAsFixed(2)}'),
+                                  title: Text(
+                                    budget.category,
+                                    style: const TextStyle(fontWeight: FontWeight.w600),
+                                  ),
+                                  trailing: Text(
+                                    '₹ ${budget.budget.toStringAsFixed(2)}',
+                                    style: TextStyle(
+                                      color: upstoxPrimary,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ),
                               ),
                             );
@@ -203,17 +254,23 @@ class _SetBudgetScreenState extends State<SetBudgetScreen> {
                 ),
                 const Divider(),
                 const SizedBox(height: 12),
-                const Align(
+                Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
                     'Add Budget Entry',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: upstoxPrimary),
                   ),
                 ),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<String>(
                   value: _selectedCategory,
                   hint: const Text('Select Category'),
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                  ),
                   items: categories
                       .where((cat) => !budgets.any((b) => b.category == cat))
                       .map((cat) => DropdownMenuItem(value: cat, child: Text(cat)))
@@ -224,12 +281,29 @@ class _SetBudgetScreenState extends State<SetBudgetScreen> {
                 TextFormField(
                   controller: _amountController,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(labelText: 'Amount'),
+                  decoration: InputDecoration(
+                    labelText: 'Amount',
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                  ),
                 ),
                 const SizedBox(height: 8),
-                ElevatedButton(
-                  onPressed: _submitBudget,
-                  child: const Text('Set Budget'),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: upstoxPrimary,
+                      foregroundColor: Colors.white, // White text
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    onPressed: _submitBudget,
+                    child: const Text(
+                      'Set Budget',
+                      style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                    ),
+                  ),
                 ),
               ],
             ),
