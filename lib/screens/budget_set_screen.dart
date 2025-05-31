@@ -205,11 +205,23 @@ class _SetBudgetScreenState extends State<SetBudgetScreen> {
                 const SizedBox(height: 8),
                 Expanded(
                   child: _fetchError != null
-                      ? Center(
-                          child: Text(
-                            _fetchError!,
-                            style: const TextStyle(color: Colors.red),
-                            textAlign: TextAlign.center,
+                      ? RefreshIndicator(
+                          color: upstoxPrimary,
+                          onRefresh: _fetchBudgets,
+                          child: ListView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            children: [
+                              SizedBox(
+                                height: 300,
+                                child: Center(
+                                  child: Text(
+                                    _fetchError!,
+                                    style: const TextStyle(color: Colors.red),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         )
                       : ListView.builder(
