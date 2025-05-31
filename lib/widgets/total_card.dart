@@ -14,20 +14,32 @@ class TotalCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Show Exp value in red, others as before
+    final bool isExp = title.toLowerCase() == 'exp';
     return Expanded(
       child: Card(
+        elevation: 3,
         child: Padding(
-          padding: const EdgeInsets.all(12.0),
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
                 title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey[700],
+                ),
               ),
               const SizedBox(height: 8),
-              Text(value, style: TextStyle(fontSize: 16, color: color)),
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: isExp ? Colors.red : (color ?? Colors.black),
+                ),
+              ),
             ],
           ),
         ),
