@@ -5,8 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/summary.dart';
 import '../models/transaction.dart';
-import '../widgets/total_card.dart';
-import '../widgets/summary_tile.dart';
 import '../widgets/transaction_tile.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -142,23 +140,40 @@ class _HomeScreenState extends State<HomeScreen> {
                   } else {
                     final totalSummary = snapshot.data!.firstWhere(
                       (s) => s.category.isEmpty,
-                      orElse:
-                          () => Summary(
-                            category: '',
-                            expenditure: 0,
-                            budget: 0,
-                            difference: 0,
-                            monthYear: '',
-                          ),
+                      orElse: () => Summary(
+                        category: '',
+                        expenditure: 0,
+                        budget: 0,
+                        difference: 0,
+                        monthYear: '',
+                      ),
                     );
-                    final totalDiffValue = totalSummary.difference;
-                    final totalDiffColor =
-                        totalDiffValue < 0 ? Colors.red : Colors.green;
+                    final totalDiffColor = totalSummary.difference < 0 ? Colors.red : Colors.green;
 
                     return RefreshIndicator(
                       onRefresh: _fetchData,
                       child: Column(
                         children: [
+                          // Add the 3 summary tiles at the top (Bud, Exp, Dif order)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              TotalCard(
+                                title: 'Bud',
+                                value: '₹ ${totalSummary.budget.toStringAsFixed(2)}',
+                              ),
+                              TotalCard(
+                                title: 'Exp',
+                                value: '₹ ${totalSummary.expenditure.toStringAsFixed(2)}',
+                              ),
+                              TotalCard(
+                                title: 'Dif',
+                                value: '₹ ${totalSummary.difference.toStringAsFixed(2)}',
+                                color: totalDiffColor,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
                           Padding(
                             padding: const EdgeInsets.only(bottom: 8.0),
                             child: Align(
@@ -169,39 +184,101 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ),
                           ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              TotalCard(
-                                title: 'Expenditure',
-                                value:
-                                    '₹ ${totalSummary.expenditure.toStringAsFixed(2)}',
+                          SizedBox(
+                            height: 220, // Increased vertical size
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: snapshot.data!
+                                    .where((summary) => summary.category.isNotEmpty)
+                                    .map((summary) {
+                                  final diffColor = summary.difference < 0 ? Colors.red : Colors.green;
+                                  return Container(
+                                    width: 200, // Increased horizontal size
+                                    margin: const EdgeInsets.only(right: 16),
+                                    child: Card(
+                                      elevation: 3,
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                                        child: SingleChildScrollView(
+                                          // Make card content scrollable if overflow
+                                          child: Column(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                                            children: [
+                                              // Category title left aligned
+                                              Text(
+                                                summary.category,
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 18,
+                                                ),
+                                                textAlign: TextAlign.left,
+                                                overflow: TextOverflow.ellipsis,
+                                                maxLines: 2,
+                                              ),
+                                              const SizedBox(height: 18),
+                                              // Bud, Exp, Dif and their values side by side
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                children: [
+                                                  Text(
+                                                    'Bud',
+                                                    style: TextStyle(fontWeight: FontWeight.w500, color: Colors.grey[700]),
+                                                  ),
+                                                  Text(
+                                                    '₹ ${summary.budget.toStringAsFixed(2)}',
+                                                    style: const TextStyle(fontSize: 17),
+                                                    overflow: TextOverflow.ellipsis,
+                                                  ),
+                                                ],
+                                              ),
+                                              const SizedBox(height: 12),
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                children: [
+                                                  Text(
+                                                    'Exp',
+                                                    style: TextStyle(fontWeight: FontWeight.w500, color: Colors.grey[700]),
+                                                  ),
+                                                  Text(
+                                                    '₹ ${summary.expenditure.toStringAsFixed(2)}',
+                                                    style: const TextStyle(
+                                                      fontSize: 17,
+                                                      color: Colors.red, // Exp number in red
+                                                    ),
+                                                    overflow: TextOverflow.ellipsis,
+                                                  ),
+                                                ],
+                                              ),
+                                              const SizedBox(height: 12),
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                children: [
+                                                  Text(
+                                                    'Dif',
+                                                    style: TextStyle(fontWeight: FontWeight.w500, color: Colors.grey[700]),
+                                                  ),
+                                                  Text(
+                                                    '₹ ${summary.difference.toStringAsFixed(2)}',
+                                                    style: TextStyle(
+                                                      fontSize: 17,
+                                                      color: diffColor,
+                                                      fontWeight: FontWeight.bold,
+                                                    ),
+                                                    overflow: TextOverflow.ellipsis,
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
                               ),
-                              TotalCard(
-                                title: 'Budget',
-                                value:
-                                    '₹ ${totalSummary.budget.toStringAsFixed(2)}',
-                              ),
-                              TotalCard(
-                                title: 'Difference',
-                                value:
-                                    '₹ ${totalSummary.difference.toStringAsFixed(2)}',
-                                color: totalDiffColor,
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Expanded(
-                            flex: 1,
-                            child: ListView.builder(
-                              itemCount: snapshot.data!.length,
-                              itemBuilder: (context, index) {
-                                final summary = snapshot.data![index];
-                                if (summary.category.isEmpty) {
-                                  return const SizedBox.shrink();
-                                }
-                                return SummaryTile(summary: summary);
-                              },
                             ),
                           ),
                           Padding(
@@ -293,6 +370,54 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         },
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+}
+
+class TotalCard extends StatelessWidget {
+  final String title;
+  final String value;
+  final Color? color;
+
+  const TotalCard({
+    super.key,
+    required this.title,
+    required this.value,
+    this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // Show Exp value in red, others as before
+    final bool isExp = title.toLowerCase() == 'exp';
+    return Expanded(
+      child: Card(
+        elevation: 3,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey[700],
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: isExp ? Colors.red : (color ?? Colors.black),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
