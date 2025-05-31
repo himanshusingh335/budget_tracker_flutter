@@ -45,7 +45,10 @@ class _SetBudgetScreenState extends State<SetBudgetScreen> {
 
   Future<void> _fetchBudgets() async {
     try {
-      final data = await ApiService.fetchBudgets(selectedMonth, selectedYear);
+      final data = await ApiService.fetchBudgets(selectedMonth, selectedYear)
+          .timeout(const Duration(seconds: 8), onTimeout: () {
+        throw Exception('Request timed out. Please check your connection.');
+      });
       setState(() {
         budgets = data;
         _fetchError = null; // clear error on success
