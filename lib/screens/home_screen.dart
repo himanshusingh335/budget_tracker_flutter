@@ -4,11 +4,11 @@ import 'package:budget_tracker_flutter/screens/transaction_screen.dart';
 import 'package:budget_tracker_flutter/services/services.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:fl_chart/fl_chart.dart';
 import '../models/summary.dart';
 import '../models/transaction.dart';
 import '../widgets/summary_tile.dart';
 import '../widgets/total_card.dart';
+import '../widgets/bar_chart.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -301,92 +301,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ),
                             // 3. Bar chart (no title)
-                            SizedBox(
-                              height: 260, // Increased height for bar chart to avoid overflow
-                              child: summaries.where((s) => s.category.isNotEmpty).isEmpty
-                                  ? const Center(child: Text('No data for chart'))
-                                  : SingleChildScrollView(
-                                      scrollDirection: Axis.horizontal,
-                                      child: SizedBox(
-                                        width: (summaries.where((s) => s.category.isNotEmpty).length * 48).toDouble().clamp(320, double.infinity),
-                                        child: BarChart(
-                                          BarChartData(
-                                            alignment: BarChartAlignment.spaceAround,
-                                            barTouchData: BarTouchData(enabled: false),
-                                            titlesData: FlTitlesData(
-                                              leftTitles: AxisTitles(
-                                                sideTitles: SideTitles(
-                                                  showTitles: true,
-                                                  reservedSize: 44,
-                                                  interval: _getYAxisInterval(summaries),
-                                                  getTitlesWidget: (value, meta) {
-                                                    if (value % _getYAxisInterval(summaries) != 0) return const SizedBox.shrink();
-                                                    return Padding(
-                                                      padding: const EdgeInsets.only(right: 4.0),
-                                                      child: Text(
-                                                        value.toInt().toString(),
-                                                        style: const TextStyle(fontSize: 11),
-                                                      ),
-                                                    );
-                                                  },
-                                                ),
-                                              ),
-                                              bottomTitles: AxisTitles(
-                                                sideTitles: SideTitles(
-                                                  showTitles: true,
-                                                  getTitlesWidget: (double value, TitleMeta meta) {
-                                                    final idx = value.toInt();
-                                                    final cats = summaries.where((s) => s.category.isNotEmpty).toList();
-                                                    if (idx < 0 || idx >= cats.length) return const SizedBox.shrink();
-                                                    return Padding(
-                                                      padding: const EdgeInsets.only(top: 8.0),
-                                                      child: Text(
-                                                        cats[idx].category.length > 7
-                                                            ? '${cats[idx].category.substring(0, 7)}…'
-                                                            : cats[idx].category,
-                                                        style: const TextStyle(fontSize: 11),
-                                                        overflow: TextOverflow.ellipsis,
-                                                      ),
-                                                    );
-                                                  },
-                                                  reservedSize: 48,
-                                                ),
-                                              ),
-                                              rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                                              topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                                            ),
-                                            borderData: FlBorderData(show: false),
-                                            gridData: FlGridData(show: true, horizontalInterval: _getYAxisInterval(summaries)),
-                                            barGroups: [
-                                              for (final entry in summaries
-                                                  .where((s) => s.category.isNotEmpty)
-                                                  .toList()
-                                                  .asMap()
-                                                  .entries)
-                                                BarChartGroupData(
-                                                  x: entry.key,
-                                                  barRods: [
-                                                    BarChartRodData(
-                                                      toY: entry.value.budget,
-                                                      color: upstoxPrimary,
-                                                      width: 12,
-                                                      borderRadius: BorderRadius.circular(4),
-                                                    ),
-                                                    BarChartRodData(
-                                                      toY: entry.value.expenditure,
-                                                      color: Colors.red[400],
-                                                      width: 12,
-                                                      borderRadius: BorderRadius.circular(4),
-                                                    ),
-                                                  ],
-                                                ),
-                                            ],
-                                            groupsSpace: 18,
-                                            maxY: _getMaxY(summaries),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
+                            SummaryBarChart(
+                              summaries: summaries,
+                              accent: upstoxPrimary,
                             ),
                             const SizedBox(height: 24),
                             // 4. Summary tiles
@@ -519,22 +436,5 @@ class _HomeScreenState extends State<HomeScreen> {
         child: const Icon(Icons.add),
       ),
     );
-  }
-
-  double _getMaxY(List<Summary> summaries) {
-    final maxVal = summaries
-        .where((s) => s.category.isNotEmpty)
-        .expand((s) => [s.budget, s.expenditure])
-        .fold<double>(0, (prev, el) => el > prev ? el : prev);
-    // Round up to nearest 1000 for a cleaner axis
-    return (maxVal / 1000.0).ceil() * 1000.0 + 1000;
-  }
-
-  double _getYAxisInterval(List<Summary> summaries) {
-    final maxY = _getMaxY(summaries);
-    if (maxY <= 2000) return 500;
-    if (maxY <= 5000) return 1000;
-    if (maxY <= 10000) return 2000;
-    return 5000;
   }
 }
