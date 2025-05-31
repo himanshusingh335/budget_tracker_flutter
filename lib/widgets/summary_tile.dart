@@ -28,7 +28,9 @@ class SummaryCard extends StatelessWidget {
       elevation: 6,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       color: Colors.white,
-      shadowColor: accent?.withOpacity(0.12) ?? Colors.black12,
+      shadowColor: (accent != null)
+          ? accent!.withAlpha(31) // replaces withOpacity(0.12)
+          : Colors.black12,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
         child: SingleChildScrollView(
