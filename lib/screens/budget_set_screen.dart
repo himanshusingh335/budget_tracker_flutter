@@ -14,6 +14,7 @@ class _SetBudgetScreenState extends State<SetBudgetScreen> {
   final _amountController = TextEditingController();
   String? _selectedCategory;
   List<Budget> budgets = [];
+  String? _fetchError; // <-- Add this line
 
   final List<String> categories = [
     'Auto',
@@ -43,10 +44,18 @@ class _SetBudgetScreenState extends State<SetBudgetScreen> {
   }
 
   Future<void> _fetchBudgets() async {
-    final data = await ApiService.fetchBudgets(selectedMonth, selectedYear);
-    setState(() {
-      budgets = data;
-    });
+    try {
+      final data = await ApiService.fetchBudgets(selectedMonth, selectedYear);
+      setState(() {
+        budgets = data;
+        _fetchError = null; // clear error on success
+      });
+    } catch (e) {
+      setState(() {
+        budgets = [];
+        _fetchError = 'Failed to load budgets: $e';
+      });
+    }
   }
 
   void _onDateChanged(String month, String year) {
@@ -116,105 +125,113 @@ class _SetBudgetScreenState extends State<SetBudgetScreen> {
             onRefresh: _fetchBudgets,
             child: Column(
               children: [
-              Row(
-                children: [
-                  DropdownButton<String>(
-                    value: selectedMonth,
-                    onChanged: (value) {
-                      if (value != null) _onDateChanged(value, selectedYear);
-                    },
-                    items: months.map((month) {
-                      return DropdownMenuItem(
-                        value: month,
-                        child: Text(DateFormat.MMMM().format(DateTime(0, int.parse(month)))),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(width: 16),
-                  DropdownButton<String>(
-                    value: selectedYear,
-                    onChanged: (value) {
-                      if (value != null) _onDateChanged(selectedMonth, value);
-                    },
-                    items: years.map((year) {
-                      return DropdownMenuItem(
-                        value: year,
-                        child: Text(year),
-                      );
-                    }).toList(),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              const Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Budget',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: budgets.length,
-                  itemBuilder: (context, index) {
-                    final budget = budgets[index];
-                    return Dismissible(
-                      key: Key('${budget.monthYear}-${budget.category}'),
-                      direction: DismissDirection.endToStart,
-                      background: Container(
-                        color: Colors.red,
-                        alignment: Alignment.centerRight,
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: const Icon(Icons.delete, color: Colors.white),
-                      ),
-                      onDismissed: (direction) {
-                        setState(() {
-                          budgets.removeAt(index);
-                        });
-                        _deleteBudget(budget);
+                Row(
+                  children: [
+                    DropdownButton<String>(
+                      value: selectedMonth,
+                      onChanged: (value) {
+                        if (value != null) _onDateChanged(value, selectedYear);
                       },
-                      child: Card(
-                        child: ListTile(
-                          title: Text(budget.category),
-                          trailing: Text('₹ ${budget.budget.toStringAsFixed(2)}'),
+                      items: months.map((month) {
+                        return DropdownMenuItem(
+                          value: month,
+                          child: Text(DateFormat.MMMM().format(DateTime(0, int.parse(month)))),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(width: 16),
+                    DropdownButton<String>(
+                      value: selectedYear,
+                      onChanged: (value) {
+                        if (value != null) _onDateChanged(selectedMonth, value);
+                      },
+                      items: years.map((year) {
+                        return DropdownMenuItem(
+                          value: year,
+                          child: Text(year),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Budget',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Expanded(
+                  child: _fetchError != null
+                      ? Center(
+                          child: Text(
+                            _fetchError!,
+                            style: const TextStyle(color: Colors.red),
+                            textAlign: TextAlign.center,
+                          ),
+                        )
+                      : ListView.builder(
+                          itemCount: budgets.length,
+                          itemBuilder: (context, index) {
+                            final budget = budgets[index];
+                            return Dismissible(
+                              key: Key('${budget.monthYear}-${budget.category}'),
+                              direction: DismissDirection.endToStart,
+                              background: Container(
+                                color: Colors.red,
+                                alignment: Alignment.centerRight,
+                                padding: const EdgeInsets.symmetric(horizontal: 20),
+                                child: const Icon(Icons.delete, color: Colors.white),
+                              ),
+                              onDismissed: (direction) {
+                                setState(() {
+                                  budgets.removeAt(index);
+                                });
+                                _deleteBudget(budget);
+                              },
+                              child: Card(
+                                child: ListTile(
+                                  title: Text(budget.category),
+                                  trailing: Text('₹ ${budget.budget.toStringAsFixed(2)}'),
+                                ),
+                              ),
+                            );
+                          },
                         ),
-                      ),
-                    );
-                  },
                 ),
-              ),
-              const Divider(),
-              const SizedBox(height: 12),
-              const Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Add Budget Entry',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                const Divider(),
+                const SizedBox(height: 12),
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Add Budget Entry',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              DropdownButtonFormField<String>(
-                value: _selectedCategory,
-                hint: const Text('Select Category'),
-                items: categories
-                    .where((cat) => !budgets.any((b) => b.category == cat))
-                    .map((cat) => DropdownMenuItem(value: cat, child: Text(cat)))
-                    .toList(),
-                onChanged: (val) => setState(() => _selectedCategory = val),
-              ),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: _amountController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Amount'),
-              ),
-              const SizedBox(height: 8),
-              ElevatedButton(
-                onPressed: _submitBudget,
-                child: const Text('Set Budget'),
-              ),
-            ],
+                const SizedBox(height: 8),
+                DropdownButtonFormField<String>(
+                  value: _selectedCategory,
+                  hint: const Text('Select Category'),
+                  items: categories
+                      .where((cat) => !budgets.any((b) => b.category == cat))
+                      .map((cat) => DropdownMenuItem(value: cat, child: Text(cat)))
+                      .toList(),
+                  onChanged: (val) => setState(() => _selectedCategory = val),
+                ),
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: _amountController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(labelText: 'Amount'),
+                ),
+                const SizedBox(height: 8),
+                ElevatedButton(
+                  onPressed: _submitBudget,
+                  child: const Text('Set Budget'),
+                ),
+              ],
             ),
           ),
         ),
