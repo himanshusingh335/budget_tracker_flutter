@@ -57,9 +57,12 @@ class _HomeScreenState extends State<HomeScreen> {
       final fetchedTransactions = await ApiService.fetchTransactions(
         selectedMonth,
         selectedYear,
-      ).timeout(const Duration(seconds: 8), onTimeout: () {
-        throw Exception('Request timed out. Please check your connection.');
-      });
+      ).timeout(
+        const Duration(seconds: 8),
+        onTimeout: () {
+          throw Exception('Request timed out. Please check your connection.');
+        },
+      );
       if (!mounted) return;
       setState(() {
         transactions = fetchedTransactions;
@@ -106,75 +109,183 @@ class _HomeScreenState extends State<HomeScreen> {
             future: summaryFuture,
             builder: (context, snapshot) {
               final Color upstoxPrimary = const Color(0xFF6C47FF);
-              if (fetchError != null) {
-                return RefreshIndicator(
-                  color: upstoxPrimary,
-                  onRefresh: _fetchData,
-                  child: ListView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    children: [
-                      SizedBox(
-                        height: 400,
-                        child: Center(
+
+              Widget dropdownRow = Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withAlpha(10),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                child: Row(
+                  children: [
+                    DropdownButton<String>(
+                      value: selectedMonth,
+                      underline: Container(),
+                      borderRadius: BorderRadius.circular(12),
+                      dropdownColor: Colors.white,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black,
+                      ),
+                      icon: Icon(Icons.keyboard_arrow_down, color: upstoxPrimary),
+                      onChanged: (value) {
+                        if (value != null) _onDateChanged(value, selectedYear);
+                      },
+                      items: months.map((month) {
+                        return DropdownMenuItem(
+                          value: month,
                           child: Text(
-                            fetchError!,
-                            style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-                            textAlign: TextAlign.center,
+                            DateFormat.MMMM().format(
+                              DateTime(0, int.parse(month)),
+                            ),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(width: 16),
+                    DropdownButton<String>(
+                      value: selectedYear,
+                      underline: Container(),
+                      borderRadius: BorderRadius.circular(12),
+                      dropdownColor: Colors.white,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black,
+                      ),
+                      icon: Icon(Icons.keyboard_arrow_down, color: upstoxPrimary),
+                      onChanged: (value) {
+                        if (value != null) _onDateChanged(selectedMonth, value);
+                      },
+                      items: years.map((year) {
+                        return DropdownMenuItem(
+                          value: year,
+                          child: Text(
+                            year,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
+              );
+
+              if (fetchError != null) {
+                return Column(
+                  children: [
+                    dropdownRow,
+                    const SizedBox(height: 16),
+                    Expanded(
+                      child: RefreshIndicator(
+                        color: upstoxPrimary,
+                        onRefresh: _fetchData,
+                        child: ListView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          children: [
+                            SizedBox(
+                              height: 400,
+                              child: Center(
+                                child: Text(
+                                  fetchError!,
+                                  style: const TextStyle(
+                                    color: Colors.red,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 );
               } else if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
+                return Column(
+                  children: [
+                    dropdownRow,
+                    const SizedBox(height: 16),
+                    const Expanded(child: Center(child: CircularProgressIndicator())),
+                  ],
+                );
               } else if (snapshot.hasError) {
-                return RefreshIndicator(
-                  color: upstoxPrimary,
-                  onRefresh: _fetchData,
-                  child: ListView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    children: [
-                      SizedBox(
-                        height: 400,
-                        child: Center(
-                          child: Text(
-                            'Error: ${snapshot.error}',
-                            style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-                            textAlign: TextAlign.center,
-                          ),
+                return Column(
+                  children: [
+                    dropdownRow,
+                    const SizedBox(height: 16),
+                    Expanded(
+                      child: RefreshIndicator(
+                        color: upstoxPrimary,
+                        onRefresh: _fetchData,
+                        child: ListView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          children: [
+                            SizedBox(
+                              height: 400,
+                              child: Center(
+                                child: Text(
+                                  'Error: ${snapshot.error}',
+                                  style: const TextStyle(
+                                    color: Colors.red,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 );
               } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return RefreshIndicator(
-                  color: upstoxPrimary,
-                  onRefresh: _fetchData,
-                  child: ListView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    children: const [
-                      SizedBox(
-                        height: 400,
-                        child: Center(
-                          child: Text('No summary available.'),
+                return Column(
+                  children: [
+                    dropdownRow,
+                    const SizedBox(height: 16),
+                    Expanded(
+                      child: RefreshIndicator(
+                        color: upstoxPrimary,
+                        onRefresh: _fetchData,
+                        child: ListView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          children: const [
+                            SizedBox(
+                              height: 400,
+                              child: Center(child: Text('No summary available.')),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 );
               } else {
                 final summaries = snapshot.data!;
                 final totalSummary = summaries.firstWhere(
                   (s) => s.category.isEmpty,
-                  orElse: () => Summary(
-                    category: '',
-                    expenditure: 0,
-                    budget: 0,
-                    difference: 0,
-                    monthYear: '',
-                  ),
+                  orElse:
+                      () => Summary(
+                        category: '',
+                        expenditure: 0,
+                        budget: 0,
+                        difference: 0,
+                        monthYear: '',
+                      ),
                 );
                 final totalDiffColor =
                     totalSummary.difference < 0 ? Colors.red : Colors.green;
@@ -186,77 +297,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     physics: const AlwaysScrollableScrollPhysics(),
                     child: Column(
                       children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withAlpha(10),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                          child: Row(
-                            children: [
-                              DropdownButton<String>(
-                                value: selectedMonth,
-                                underline: Container(),
-                                borderRadius: BorderRadius.circular(12),
-                                dropdownColor: Colors.white,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.black,
-                                ),
-                                icon: Icon(Icons.keyboard_arrow_down, color: upstoxPrimary),
-                                onChanged: (value) {
-                                  if (value != null) _onDateChanged(value, selectedYear);
-                                },
-                                items: months.map((month) {
-                                  return DropdownMenuItem(
-                                    value: month,
-                                    child: Text(
-                                      DateFormat.MMMM().format(
-                                        DateTime(0, int.parse(month)),
-                                      ),
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  );
-                                }).toList(),
-                              ),
-                              const SizedBox(width: 16),
-                              DropdownButton<String>(
-                                value: selectedYear,
-                                underline: Container(),
-                                borderRadius: BorderRadius.circular(12),
-                                dropdownColor: Colors.white,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.black,
-                                ),
-                                icon: Icon(Icons.keyboard_arrow_down, color: upstoxPrimary),
-                                onChanged: (value) {
-                                  if (value != null) _onDateChanged(selectedMonth, value);
-                                },
-                                items: years.map((year) {
-                                  return DropdownMenuItem(
-                                    value: year,
-                                    child: Text(
-                                      year,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  );
-                                }).toList(),
-                              ),
-                            ],
-                          ),
-                        ),
+                        dropdownRow,
                         const SizedBox(height: 16),
                         LayoutBuilder(
                           builder: (context, constraints) {
@@ -264,25 +305,31 @@ class _HomeScreenState extends State<HomeScreen> {
                             final cardCount = 3;
                             final minCardWidth = 120.0;
                             final spacing = 16.0;
-                            final totalMinWidth = cardCount * minCardWidth + (cardCount - 1) * spacing;
-                            final showScrollable = constraints.maxWidth < totalMinWidth;
+                            final totalMinWidth =
+                                cardCount * minCardWidth +
+                                (cardCount - 1) * spacing;
+                            final showScrollable =
+                                constraints.maxWidth < totalMinWidth;
 
                             final cards = [
                               TotalCard(
                                 title: 'Bud',
-                                value: '₹ ${totalSummary.budget.toStringAsFixed(1)}',
+                                value:
+                                    '₹ ${totalSummary.budget.toStringAsFixed(1)}',
                                 color: Colors.grey[900],
                                 accent: upstoxPrimary,
                               ),
                               TotalCard(
                                 title: 'Exp',
-                                value: '₹ ${totalSummary.expenditure.toStringAsFixed(1)}',
+                                value:
+                                    '₹ ${totalSummary.expenditure.toStringAsFixed(1)}',
                                 color: Colors.red[600],
                                 accent: upstoxPrimary,
                               ),
                               TotalCard(
                                 title: 'Dif',
-                                value: '₹ ${totalSummary.difference.toStringAsFixed(1)}',
+                                value:
+                                    '₹ ${totalSummary.difference.toStringAsFixed(1)}',
                                 color: totalDiffColor,
                                 accent: upstoxPrimary,
                               ),
@@ -294,7 +341,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                 child: ListView.separated(
                                   scrollDirection: Axis.horizontal,
                                   itemCount: cards.length,
-                                  separatorBuilder: (_, __) => const SizedBox(width: 16),
+                                  separatorBuilder:
+                                      (_, __) => const SizedBox(width: 16),
                                   itemBuilder: (context, i) => cards[i],
                                 ),
                               );
@@ -302,10 +350,12 @@ class _HomeScreenState extends State<HomeScreen> {
                               return SizedBox(
                                 height: 110,
                                 child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                  children: cards
-                                      .map((card) => Expanded(child: card))
-                                      .toList(),
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children:
+                                      cards
+                                          .map((card) => Expanded(child: card))
+                                          .toList(),
                                 ),
                               );
                             }
@@ -319,7 +369,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             alignment: Alignment.centerLeft,
                             child: Text(
                               'Summary',
-                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              style: Theme.of(
+                                context,
+                              ).textTheme.titleLarge?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: upstoxPrimary,
                               ),
@@ -339,18 +391,25 @@ class _HomeScreenState extends State<HomeScreen> {
                             scrollDirection: Axis.horizontal,
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: summaries
-                                  .where((summary) => summary.category.isNotEmpty)
-                                  .map((summary) {
-                                return Container(
-                                  width: 200,
-                                  margin: const EdgeInsets.only(right: 16),
-                                  child: SummaryCard(
-                                    summary: summary,
-                                    accent: upstoxPrimary,
-                                  ),
-                                );
-                              }).toList(),
+                              children:
+                                  summaries
+                                      .where(
+                                        (summary) =>
+                                            summary.category.isNotEmpty,
+                                      )
+                                      .map((summary) {
+                                        return Container(
+                                          width: 200,
+                                          margin: const EdgeInsets.only(
+                                            right: 16,
+                                          ),
+                                          child: SummaryCard(
+                                            summary: summary,
+                                            accent: upstoxPrimary,
+                                          ),
+                                        );
+                                      })
+                                      .toList(),
                             ),
                           ),
                         ),
@@ -362,19 +421,25 @@ class _HomeScreenState extends State<HomeScreen> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: upstoxPrimary,
                               foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                               padding: const EdgeInsets.symmetric(vertical: 14),
                             ),
                             icon: const Icon(Icons.list_alt),
                             label: const Text(
                               'View Transactions',
-                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
                             ),
                             onPressed: () {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => const TransactionScreen(),
+                                  builder:
+                                      (context) => const TransactionScreen(),
                                   settings: RouteSettings(
                                     arguments: {
                                       'selectedMonth': selectedMonth,
