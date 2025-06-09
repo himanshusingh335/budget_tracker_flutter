@@ -47,17 +47,10 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       fetchError = null;
       summaryFuture = ApiService.fetchSummary(selectedMonth, selectedYear);
-      transactionFuture = ApiService.fetchTransactions(
-        selectedMonth,
-        selectedYear,
-      );
     });
 
     try {
-      final fetchedTransactions = await ApiService.fetchTransactions(
-        selectedMonth,
-        selectedYear,
-      ).timeout(
+      final summary = await summaryFuture.timeout(
         const Duration(seconds: 8),
         onTimeout: () {
           throw Exception('Request timed out. Please check your connection.');
@@ -65,12 +58,12 @@ class _HomeScreenState extends State<HomeScreen> {
       );
       if (!mounted) return;
       setState(() {
-        transactions = fetchedTransactions;
+        summaryFuture = Future.value(summary);
       });
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        fetchError = 'Failed to load data: $e';
+        fetchError = 'Failed to load summary: $e';
       });
     }
   }

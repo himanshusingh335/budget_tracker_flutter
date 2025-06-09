@@ -49,7 +49,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
     });
 
     try {
-      final fetchedTransactions = await ApiService.fetchTransactions(selectedMonth, selectedYear);
+      final fetchedTransactions = await transactionFuture;
       if (!mounted) return;
       setState(() {
         transactions = fetchedTransactions;
