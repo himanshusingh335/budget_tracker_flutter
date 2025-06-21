@@ -3,12 +3,12 @@ import 'package:budget_tracker_flutter/screens/new_transaction_screen.dart';
 import 'package:budget_tracker_flutter/screens/transaction_screen.dart';
 import 'package:budget_tracker_flutter/services/services.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../models/summary.dart';
 import '../models/transaction.dart';
 import '../widgets/summary_tile.dart';
 import '../widgets/total_card.dart';
 import '../widgets/bar_chart.dart';
+import '../widgets/dropdown_monthyear.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -103,76 +103,13 @@ class _HomeScreenState extends State<HomeScreen> {
             builder: (context, snapshot) {
               final Color upstoxPrimary = const Color(0xFF6C47FF);
 
-              Widget dropdownRow = Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withAlpha(10),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                child: Row(
-                  children: [
-                    DropdownButton<String>(
-                      value: selectedMonth,
-                      underline: Container(),
-                      borderRadius: BorderRadius.circular(12),
-                      dropdownColor: Colors.white,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black,
-                      ),
-                      icon: Icon(Icons.keyboard_arrow_down, color: upstoxPrimary),
-                      onChanged: (value) {
-                        if (value != null) _onDateChanged(value, selectedYear);
-                      },
-                      items: months.map((month) {
-                        return DropdownMenuItem(
-                          value: month,
-                          child: Text(
-                            DateFormat.MMMM().format(
-                              DateTime(0, int.parse(month)),
-                            ),
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                    const SizedBox(width: 16),
-                    DropdownButton<String>(
-                      value: selectedYear,
-                      underline: Container(),
-                      borderRadius: BorderRadius.circular(12),
-                      dropdownColor: Colors.white,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black,
-                      ),
-                      icon: Icon(Icons.keyboard_arrow_down, color: upstoxPrimary),
-                      onChanged: (value) {
-                        if (value != null) _onDateChanged(selectedMonth, value);
-                      },
-                      items: years.map((year) {
-                        return DropdownMenuItem(
-                          value: year,
-                          child: Text(
-                            year,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ],
-                ),
+              Widget dropdownRow = DropdownMonthYear(
+                selectedMonth: selectedMonth,
+                selectedYear: selectedYear,
+                months: months,
+                years: years,
+                onChanged: _onDateChanged,
+                primaryColor: upstoxPrimary,
               );
 
               if (fetchError != null) {
@@ -211,7 +148,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     dropdownRow,
                     const SizedBox(height: 16),
-                    const Expanded(child: Center(child: CircularProgressIndicator())),
+                    const Expanded(
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
                   ],
                 );
               } else if (snapshot.hasError) {
@@ -259,7 +198,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           children: const [
                             SizedBox(
                               height: 400,
-                              child: Center(child: Text('No summary available.')),
+                              child: Center(
+                                child: Text('No summary available.'),
+                              ),
                             ),
                           ],
                         ),

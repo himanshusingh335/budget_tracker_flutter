@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../models/transaction.dart';
 import '../widgets/transaction_tile.dart';
 import '../services/services.dart';
+import '../widgets/dropdown_monthyear.dart';
 
 class TransactionScreen extends StatefulWidget {
   const TransactionScreen({super.key});
@@ -84,31 +84,20 @@ class _TransactionScreenState extends State<TransactionScreen> {
           onRefresh: _fetchTransactions,
           child: Column(
             children: [
-              // Show selected month and year as heading, no dropdowns
-              Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withAlpha(10),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-                child: Text(
-                  '${DateFormat.MMMM().format(DateTime(0, int.parse(selectedMonth)))} $selectedYear',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                    color: upstoxPrimary,
-                    letterSpacing: 0.5,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
+              // Replace the heading with the dropdown if you want to allow changing month/year
+              DropdownMonthYear(
+                selectedMonth: selectedMonth,
+                selectedYear: selectedYear,
+                months: months,
+                years: years,
+                onChanged: (month, year) {
+                  setState(() {
+                    selectedMonth = month;
+                    selectedYear = year;
+                  });
+                  _fetchTransactions();
+                },
+                primaryColor: upstoxPrimary,
               ),
               const SizedBox(height: 16),
               Expanded(
