@@ -1,6 +1,7 @@
 import 'package:budget_tracker_flutter/screens/budget_set_screen.dart';
 import 'package:budget_tracker_flutter/screens/new_transaction_screen.dart';
 import 'package:budget_tracker_flutter/screens/transaction_screen.dart';
+import 'package:budget_tracker_flutter/screens/ask_budget_screen.dart';
 import 'package:budget_tracker_flutter/services/services.dart';
 import 'package:flutter/material.dart';
 import '../models/summary.dart';
@@ -445,6 +446,30 @@ class _HomeScreenState extends State<HomeScreen> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => const SetBudgetScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 2),
+                    ListTile(
+                      leading: const Icon(
+                        Icons.question_answer,
+                        color: Colors.white,
+                      ),
+                      tileColor: const Color(0xFF6C47FF),
+                      title: const Text(
+                        'Ask About Your Budget',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const AskBudgetScreen(),
                           ),
                         );
                       },
