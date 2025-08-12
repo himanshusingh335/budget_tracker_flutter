@@ -30,6 +30,21 @@
 
 🏗 Architecture
 
+flowchart TD
+    A[📱 Flutter Mobile App] -->|Fetch Budget & Transactions| B[🔹 Flask API<br>(SQLite DB)]
+    A -->|Ask Budget Questions| C[🧠 CrewAI Application API]
+
+    B -->|Data Read/Write| D[🐳 Docker Container on Raspberry Pi]
+    C -->|Data Processing| D
+
+    D -->|Remote Access| E[🌐 Tailscale VPN]
+
+    style A fill:#c4b5fd,stroke:#7c3aed,stroke-width:2px
+    style B fill:#bfdbfe,stroke:#2563eb,stroke-width:2px
+    style C fill:#fed7aa,stroke:#ea580c,stroke-width:2px
+    style D fill:#bbf7d0,stroke:#16a34a,stroke-width:2px
+    style E fill:#e5e7eb,stroke:#374151,stroke-width:2px
+	
 Workflow:
 	1.	Flutter Mobile App → Fetches budget & transaction data from Flask API.
 	2.	Flask API → Reads/writes data in a SQLite database.
