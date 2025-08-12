@@ -29,21 +29,6 @@
 ⸻
 
 🏗 Architecture
-
-flowchart TD
-    A[📱 Flutter Mobile App] -->|Fetch Budget & Transactions| B[🔹 Flask API<br>(SQLite DB)]
-    A -->|Ask Budget Questions| C[🧠 CrewAI Application API]
-
-    B -->|Data Read/Write| D[🐳 Docker Container on Raspberry Pi]
-    C -->|Data Processing| D
-
-    D -->|Remote Access| E[🌐 Tailscale VPN]
-
-    style A fill:#c4b5fd,stroke:#7c3aed,stroke-width:2px
-    style B fill:#bfdbfe,stroke:#2563eb,stroke-width:2px
-    style C fill:#fed7aa,stroke:#ea580c,stroke-width:2px
-    style D fill:#bbf7d0,stroke:#16a34a,stroke-width:2px
-    style E fill:#e5e7eb,stroke:#374151,stroke-width:2px
 	
 Workflow:
 	1.	Flutter Mobile App → Fetches budget & transaction data from Flask API.
@@ -60,25 +45,25 @@ Dashboard
 
 Shows total budget, total expenses, and a visual spending summary.
 
-![Dashboard Screenshot](Screenshot%202025-08-12%20at%2012.40.30 PM.jpeg)
+![Screenshot 2025-08-12 at 12 40 30 PM](https://github.com/user-attachments/assets/41392db6-0222-46e3-8e72-2cb0d021fabf)
 
 Transactions
 
 List of all expenses with date, category, and details.
 
-![Transactions Screenshot](Screenshot%202025-08-12%20at%2012.41.17 PM.jpeg)
+![Screenshot 2025-08-12 at 12 41 17 PM](https://github.com/user-attachments/assets/db0ae265-11c2-43e6-bfa2-d1cd3664ba56)
 
 Set Budget
 
 Easily set or adjust monthly budgets per category.
 
-![Set Budget Screenshot](Screenshot%202025-08-12%20at%2012.41.39 PM.jpeg)
+![Screenshot 2025-08-12 at 12 41 39 PM](https://github.com/user-attachments/assets/3a1a7238-895a-4935-9352-cbaabb56f8a7)
 
 AI Q&A Analysis
 
 Ask CrewAI about your budget trends and overspending patterns.
 
-![Ask About Budget Screenshot](Screenshot%202025-08-12%20at%2012.51.04 PM.jpeg)
+![Screenshot 2025-08-12 at 12 51 04 PM](https://github.com/user-attachments/assets/b73ccc72-76cf-49be-bd33-f2135ad4b402)
 
 ⸻
 
