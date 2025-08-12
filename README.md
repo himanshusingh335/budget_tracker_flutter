@@ -45,7 +45,7 @@ Dashboard
 
 Shows total budget, total expenses, and a visual spending summary.
 
-<img src="https://github.com/user-attachments/assets/41392db6-0222-46e3-8e72-2cb0d021fabf" width="50%">
+<img src="https://github.com/user-attachments/assets/41392db6-0222-46e3-8e72-2cb0d021fabf" width="80%">
 
 Transactions
 
