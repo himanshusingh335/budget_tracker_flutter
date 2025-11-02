@@ -144,7 +144,7 @@ class _NewTransactionScreenState extends State<NewTransactionScreen> {
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                value: _selectedCategory,
+                initialValue: _selectedCategory,
                 hint: const Text('Select Category'),
                 decoration: InputDecoration(
                   filled: true,
