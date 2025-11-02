@@ -135,14 +135,80 @@ WebViewController()
 - ✅ Dependencies installed (`flutter pub get`)
 - ✅ Code compiles without errors
 - ✅ No orphaned imports or references
+- ✅ CocoaPods issue resolved
+- ✅ iOS App Transport Security configured
 
 ### Deployment Status
-- 🔄 iOS deployment blocked by CocoaPods issue (user fixing)
-- ⏳ Pending iOS device testing
-- ⏳ Pending Android device testing
+- ✅ iOS release build tested on iPhone (iOS 26.0.1)
+- ✅ Android release build tested on moto g54 5G (Android 15)
+- ✅ WebView loading successfully on both platforms
+- ✅ Release builds installed locally on both devices
 
-### Known Issues
-- CocoaPods version mismatch on macOS (requires reinstall)
+### Known Issues - RESOLVED
+- ~~CocoaPods version mismatch on macOS~~ ✅ Fixed
+- ~~iOS App Transport Security blocking HTTP~~ ✅ Fixed (added NSAppTransportSecurity exception)
+- ~~Android WebView not updated~~ ✅ Fixed (rebuilt APK)
+
+---
+
+## Platform-Specific Configuration
+
+### iOS App Transport Security (ATS)
+
+**Critical Requirement:** iOS blocks non-HTTPS connections by default. To allow HTTP access to the Tailscale domain, the following configuration was added to `ios/Runner/Info.plist`:
+
+```xml
+<key>NSAppTransportSecurity</key>
+<dict>
+  <key>NSExceptionDomains</key>
+  <dict>
+    <key>raspberrypi4.tailad9f80.ts.net</key>
+    <dict>
+      <key>NSExceptionAllowsInsecureHTTPLoads</key>
+      <true/>
+      <key>NSIncludesSubdomains</key>
+      <true/>
+    </dict>
+  </dict>
+</dict>
+```
+
+**Security Note:** This exception only affects the specific Tailscale domain. All other URLs still require HTTPS.
+
+**File Location:** [ios/Runner/Info.plist](ios/Runner/Info.plist#L48-L60)
+
+### Android Configuration
+
+**Minimum Requirements:**
+- Android SDK 20+ (API level 20+)
+- WebView component enabled
+- Internet permission (automatically handled by Flutter)
+
+**No additional configuration needed** - WebView works out of the box on Android for HTTP connections.
+
+### Building Release Versions
+
+**iOS Release:**
+```bash
+flutter build ios --release
+flutter install -d <device-id>
+```
+- Automatic code signing with development team
+- Provisioning profile must be valid
+- Device must be registered in Apple Developer account
+
+**Android Release:**
+```bash
+flutter build apk --release
+flutter install -d <device-id>
+```
+- Builds a universal APK (works on all architectures)
+- No code signing required for local installation
+- Can be directly installed via USB debugging
+
+**Build Locations:**
+- iOS: `build/ios/iphoneos/Runner.app` (28.2 MB)
+- Android: `build/app/outputs/flutter-apk/app-release.apk` (49.9 MB)
 
 ---
 
@@ -222,6 +288,59 @@ If rollback is needed:
 
 ## Developer Notes
 
+### Git Workflow & Branching Strategy
+
+**IMPORTANT:** This project follows a feature-branch workflow. Always follow these steps:
+
+1. **Create a new branch for each feature:**
+   ```bash
+   git checkout -b feature/feature-name
+   ```
+
+2. **Make commits on the feature branch:**
+   ```bash
+   git add .
+   git commit -m "Descriptive commit message"
+   ```
+
+3. **Wait for approval before merging:**
+   - DO NOT merge to main immediately
+   - Present your work and wait for user approval
+   - Only merge when explicitly requested
+
+4. **Merge to main after approval:**
+   ```bash
+   git checkout main
+   git merge feature/feature-name
+   git push origin main
+   ```
+
+**Benefits:**
+- Keeps main branch stable
+- Allows review before integration
+- Easy rollback if needed
+- Clear feature history
+
+**Example:**
+```bash
+# Starting a new feature
+git checkout -b feature/add-dark-mode
+
+# Making changes and commits
+git add lib/theme/dark_theme.dart
+git commit -m "Add dark theme configuration"
+
+# Wait for user approval...
+# User says: "looks good, merge it"
+
+# Merge to main
+git checkout main
+git merge feature/add-dark-mode
+git push origin main
+```
+
+---
+
 ### WebView Debugging (iOS)
 - Enable Safari Web Inspector: Settings → Safari → Advanced → Web Inspector
 - Connect device and use Safari → Develop → [Device Name]
@@ -239,6 +358,85 @@ open http://raspberrypi4.tailad9f80.ts.net:3000/?apiUrl=http://raspberrypi4.tail
 
 ---
 
+## Troubleshooting
+
+### Common Issues and Solutions
+
+#### 1. iOS: "The resource could not be loaded because the App Transport Security policy requires the use of a secure connection"
+
+**Problem:** iOS blocks HTTP connections by default.
+
+**Solution:** Ensure `ios/Runner/Info.plist` contains the NSAppTransportSecurity exception:
+```bash
+# Verify the configuration exists
+cat ios/Runner/Info.plist | grep -A 10 "NSAppTransportSecurity"
+```
+
+**Fix:** Add the ATS exception as documented in the Platform-Specific Configuration section.
+
+---
+
+#### 2. Android: Old version without WebView shows
+
+**Problem:** Android app not updated with latest changes.
+
+**Solution:** Rebuild and reinstall the APK:
+```bash
+flutter clean
+flutter pub get
+flutter build apk --release
+flutter install -d <device-id>
+```
+
+---
+
+#### 3. CocoaPods installation fails
+
+**Problem:** Ruby version mismatch or CocoaPods not installed.
+
+**Solution:**
+```bash
+# Reinstall CocoaPods
+sudo gem install cocoapods
+
+# Or use Homebrew
+brew install cocoapods
+
+# Then install pods
+cd ios
+pod install
+cd ..
+```
+
+---
+
+#### 4. WebView shows "Could not connect to the server"
+
+**Problem:** Device not connected to Tailscale network or backend not running.
+
+**Solutions:**
+- Ensure device is connected to Tailscale VPN
+- Verify backend is running on Raspberry Pi
+- Test URL in device browser: `http://raspberrypi4.tailad9f80.ts.net:3000`
+- Check network connectivity
+
+---
+
+#### 5. "Provisioning profile has expired" (iOS)
+
+**Problem:** Development certificate expired.
+
+**Solution:**
+```bash
+# Build with automatic signing
+flutter build ios --release
+# Don't use --no-codesign flag
+```
+
+Ensure your Apple Developer account is active and device is registered.
+
+---
+
 ## Contact & Resources
 
 - **Flutter WebView Docs:** https://pub.dev/packages/webview_flutter
@@ -250,12 +448,36 @@ open http://raspberrypi4.tailad9f80.ts.net:3000/?apiUrl=http://raspberrypi4.tail
 ## Changelog
 
 ### v0.1.1 - 2025-11-02
-- ✅ Migrated AskBudgetScreen to WebView
+
+**Migration: CrewAI → LangGraph WebView**
+
+**Code Changes:**
+- ✅ Migrated AskBudgetScreen to WebView implementation
 - ✅ Removed CrewAI REST API integration
 - ✅ Deleted obsolete service and model files
-- ✅ Added webview_flutter dependency
+- ✅ Added webview_flutter ^4.10.0 dependency
+
+**Platform Configuration:**
+- ✅ Configured iOS App Transport Security for HTTP access
+- ✅ Added NSAppTransportSecurity exception for Tailscale domain
+- ✅ Updated CocoaPods dependencies (iOS/macOS)
+
+**Testing & Deployment:**
+- ✅ Tested on iPhone (iOS 26.0.1)
+- ✅ Tested on moto g54 5G (Android 15)
+- ✅ Released iOS build (28.2 MB)
+- ✅ Released Android APK (49.9 MB)
+
+**Documentation:**
+- ✅ Added comprehensive migration guide (claude.md)
+- ✅ Documented Git branching workflow
+- ✅ Added platform-specific configuration notes
+- ✅ Included troubleshooting steps
+
+**Files Modified:** 17 files changed, 586 insertions(+), 171 deletions(-)
 
 ---
 
 **Migration completed by:** Claude (Anthropic)
-**Reviewed by:** Pending user testing
+**Tested by:** User on iOS 26.0.1 & Android 15
+**Status:** ✅ Production Ready
